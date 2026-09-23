@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>个人思想库 · 学会你的逻辑</title>
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- ======================= 侧边栏 ======================= -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🧠</div>
+        <div class="brand-text">
+          <div class="brand-name">个人思想库</div>
+          <div class="brand-sub">记录思想 · 学会逻辑 · 思维分身</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-btn active" data-tab="library"><span class="nav-ico">📚</span>思想库</button>
+        <button class="nav-btn" data-tab="chat"><span class="nav-ico">💬</span>智能问答</button>
+        <button class="nav-btn" data-tab="chat"><span class="nav-ico">💬</span>智能问答</button>
+        <button class="nav-btn" data-tab="study"><span class="nav-ico">🎓</span>学习模式</button>
+        <button class="nav-btn" data-tab="settings"><span class="nav-ico">⚙️</span>设置</button>
+      </nav>
+
+      <div class="conv-panel">
+        <div class="conv-title">最近对话</div>
+        <div class="conv-list" id="convList"></div>
+      </div>
+
+      <div class="sidebar-foot">
+        <button class="theme-toggle" id="themeToggle">🌙 夜间模式</button>
+        <div class="storage-line" title="数据保存位置">💾 数据存于本项目目录下 data\</div>
+      </div>
+    </aside>
+
+    <!-- ======================= 主区域 ======================= -->
+    <main class="main">
+
+      <!-- ---------- 思想库 ---------- -->
+      <section class="tab-pane active" id="tab-library">
+        <div class="pane-head">
+          <h1>思想库 <span class="count-badge" id="thoughtCount">0</span></h1>
+          <div class="head-actions">
+            <button class="btn ghost" id="btnExport" title="下载 JSON 备份文件">⬇ 导出备份</button>
+            <button class="btn ghost" id="btnImport" title="从备份文件恢复">⬆ 导入备份</button>
+            <button class="btn ghost" id="btnImportDoc" title="导入 txt / Word / zip 文档">📄 导入文档</button>
+            <button class="btn primary" id="btnNewThought">＋ 记录思想</button>
+          </div>
+        </div>
+
+        <!-- 思想仓库选择条 -->
+        <div class="repo-bar" id="repoBar"></div>
+
+        <div class="filter-bar">
+          <input class="search" id="searchInput" placeholder="🔍 搜索标题、内容、标签…" />
+          <select id="categoryFilter">
+            <option value="">全部分类</option>
+            <option>原则</option>
+            <option>决策逻辑</option>
+            <option>知识</option>
+            <option>经验</option>
+            <option>其他</option>
+          </select>
+          <select id="importanceFilter">
+            <option value="">全部重要度</option>
+            <option value="high">⭐ 重要</option>
+            <option value="medium">普通</option>
+            <option value="low">一般</option>
+          </select>
+        </div>
+
+        <div class="cat-stats" id="catStats"></div>
+
+        <div class="thought-grid" id="thoughtGrid"></div>
+        <div class="empty" id="libraryEmpty" hidden>
+          <div class="empty-icon">🌱</div>
+          <p>当前仓库还没有思想。<br/>点击「＋ 记录思想」录入，或用「📄 导入文档」把 txt / Word / zip 文档批量导入。<br/>不同领域可以建立<strong>多个思想仓库</strong>，问答时只从相应仓库抽取知识。</p>
+        </div>
+      </section>
+
+      <!-- ---------- 智能问答 ---------- -->
+      <section class="tab-pane" id="tab-chat">
+        <div class="chat-wrap">
+          <div class="pane-head chat-head">
+            <h1>智能问答</h1>
+            <div class="head-actions">
+              <button class="btn ghost" id="btnNewConv">＋ 新对话</button>
+              <button class="btn ghost" id="btnDelConv" title="删除当前对话">🗑 删除</button>
+            </div>
+          </div>
+
+          <div class="chat-body" id="chatBody">
+            <div class="chat-welcome" id="chatWelcome">
+              <div class="welcome-icon">🧠</div>
+              <h2>向你的思维分身提问</h2>
+              <p>我会<strong>只从你选择的思想仓库</strong>检索内容，再调用 AI，按照你的原则与决策逻辑选择最合适的路径来回答。</p>
+              <div class="welcome-samples" id="welcomeSamples">
+                <button class="chip">按照我的原则，这件事我该怎么处理？</button>
+                <button class="chip">结合我的知识，帮我分析一下这个问题</button>
+                <button class="chip">用我做事的方式，给一个执行方案</button>
+              </div>
+            </div>
+            <div class="msg-list" id="msgList"></div>
+          </div>
+
+          <div class="chat-input-bar">
+            <textarea id="chatInput" rows="1" placeholder="输入你的问题…（Enter 发送，Shift+Enter 换行）"></textarea>
+            <button class="btn primary send" id="btnSend">发送</button>
+            <button class="btn danger stop" id="btnStop" hidden>■ 停止</button>
+          </div>
+
+          <!-- 问答仓库选择 -->
+          <div class="repo-select" id="repoSelect"></div>
+        </div>
+      </section>
+
+      <!-- ---------- 学习模式 ---------- -->
+      <section class="tab-pane" id="tab-study">
+        <div class="pane-head">
+          <h1>学习模式</h1>
+          <div class="head-actions">
+            <button class="btn ghost" id="btnStudyHint" title="让教练只给 1 个关键词方向">💡 给提示</button>
+            <button class="btn ghost" id="btnStudySubtitle" title="对比知识库，纠正字幕/表述错误">📺 纠正字幕错误</button>
+            <button class="btn danger" id="btnStudyEnd" title="结束学习并输出学习报告">🏁 结束学习</button>
+            <button class="btn primary" id="btnStudyStart">▶ 开始学习</button>
+          </div>
+        </div>
+
+        <div class="study-layout">
+          <!-- 左侧：范围 / 当前知识点 -->
+          <aside class="study-side">
+            <div class="card">
+              <h3>🎯 学习范围</h3>
+              <div class="repo-select study-repo" id="studyRepoSelect"></div>
+              <p class="hint">选择要复习的仓库（可多选，不选则全部仓库）</p>
+            </div>
+            <div class="card">
+              <h3>📌 当前知识点</h3>
+              <div id="studyCurrent"></div>
+            </div>
+          </aside>
+
+          <!-- 右侧：知识点列表 + 对话区 -->
+          <div class="study-main">
+            <div class="card study-list-card">
+              <div class="study-list-head">
+                <h3>知识点与存活率</h3>
+                <span class="study-list-note" id="studyListNote"></span>
+                <button class="link-btn" id="btnStudyRefresh">刷新</button>
+              </div>
+              <div class="study-list" id="studyList"></div>
+            </div>
+
+            <div class="study-chat">
+              <div class="chat-body study-chat-body" id="studyChatBody">
+                <div class="chat-welcome" id="studyWelcome">
+                  <div class="welcome-icon">🎓</div>
+                  <h2>开始学习</h2>
+                  <p>教练会从你的思想库抽知识点出题（带陷阱），你作答后进入<strong>思维对抗</strong>，答对再进<strong>极限压测</strong>，并为每个知识点维护<strong>存活率</strong>。</p>
+                  <div class="welcome-samples">
+                    <button class="chip" data-study-start="1">▶ 开始学习</button>
+                  </div>
+                </div>
+                <div class="msg-list" id="studyMsgList"></div>
+              </div>
+              <div class="chat-input-bar">
+                <textarea id="studyInput" rows="1" placeholder="输入你的作答…（Enter 发送，Shift+Enter 换行）"></textarea>
+                <button class="btn primary send" id="btnStudySend">发送</button>
+                <button class="btn danger stop" id="btnStudyStop" hidden>■ 停止</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- 设置 ---------- -->
+      <section class="tab-pane" id="tab-settings">
+        <div class="pane-head"><h1>设置</h1></div>
+        <div class="settings-grid">
+          <div class="card">
+            <h2>🤖 AI 接口配置</h2>
+            <p class="hint">填写兼容 OpenAI 协议的接口地址与密钥（如 DeepSeek、OpenAI、通义千问、Kimi 等）。密钥仅保存在本机 <code>项目目录\config.json</code>，不会上传。</p>
+
+            <div class="form-row">
+              <label>接口地址 Base URL</label>
+              <input id="cfgBaseUrl" placeholder="https://api.deepseek.com/v1" />
+            </div>
+            <div class="form-row">
+              <label>API 密钥 <span class="req">*</span></label>
+              <div class="key-row">
+                <input id="cfgApiKey" type="password" placeholder="sk-..." autocomplete="off" />
+                <button class="btn ghost sm" id="btnToggleKey">显示</button>
+              </div>
+            </div>
+            <div class="form-row">
+              <label>模型名称</label>
+              <input id="cfgModel" placeholder="deepseek-chat" />
+            </div>
+            <div class="form-row two-col">
+              <div>
+                <label>温度（0-1，越高越发散）</label>
+                <input id="cfgTemperature" type="number" min="0" max="1" step="0.05" />
+              </div>
+              <div>
+                <label>每次检索思想条数（1-20）</label>
+                <input id="cfgTopK" type="number" min="1" max="20" />
+              </div>
+            </div>
+            <div class="form-row">
+              <label>对你的称呼（思维分身会以你的身份说话）</label>
+              <input id="cfgUserName" placeholder="我" />
+            </div>
+            <div class="form-row">
+              <label>自定义系统提示词（可选，追加在默认提示之前）</label>
+              <textarea id="cfgSystemPrompt" rows="4" placeholder="例如：回答时先给结论再给理由；涉及金钱决策时提醒风险…"></textarea>
+            </div>
+            <div class="form-row actions">
+              <button class="btn primary" id="btnSaveCfg">保存设置</button>
+              <button class="btn ghost" id="btnTestAI">测试连接</button>
+              <span class="test-result" id="testResult"></span>
+            </div>
+            <p class="hint" id="cfgSavedHint" hidden>✅ 设置已保存</p>
+          </div>
+
+          <div class="card">
+            <h2>💾 数据管理</h2>
+            <div class="stat-list" id="statList"></div>
+            <div class="form-row actions">
+              <button class="btn ghost" id="btnExport2">⬇ 导出备份</button>
+              <button class="btn ghost" id="btnImport2">⬆ 导入备份</button>
+              <button class="btn danger" id="btnClearAll">🗑 清空思想库</button>
+            </div>
+            <p class="hint">所有数据以 JSON 文件保存在 <code>项目目录\data</code>，不写入系统盘。备份会包含全部仓库与思想。定期导出更安心。</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ======================= 思想编辑弹窗 ======================= -->
+  <div class="modal-mask" id="thoughtModal" hidden>
+    <div class="modal">
+      <h2 id="thoughtModalTitle">记录思想</h2>
+      <div class="form-row">
+        <label>标题 <span class="req">*</span></label>
+        <input id="tTitle" placeholder="一句话概括这条思想" />
+      </div>
+      <div class="form-row two-col">
+        <div>
+          <label>分类</label>
+          <select id="tCategory">
+            <option>原则</option>
+            <option>决策逻辑</option>
+            <option>知识</option>
+            <option>经验</option>
+            <option>其他</option>
+          </select>
+        </div>
+        <div>
+          <label>重要度</label>
+          <select id="tImportance">
+            <option value="high">⭐ 重要</option>
+            <option value="medium" selected>普通</option>
+            <option value="low">一般</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <label>所属仓库</label>
+        <select id="tRepo"></select>
+      </div>
+      <div class="form-row">
+        <label>标签（用逗号分隔）</label>
+        <input id="tTags" placeholder="例如：工作, 决策, 健康" />
+      </div>
+      <div class="form-row">
+        <label>内容 <span class="req">*</span></label>
+        <textarea id="tContent" rows="8"></textarea>
+        <div class="hint" id="tCategoryHint"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="btnModalImportDoc" title="导入 txt / Word / zip 文档">📄 导入文档</button>
+        <span class="spacer"></span>
+        <button class="btn ghost" id="btnCancelThought">取消</button>
+        <button class="btn primary" id="btnSaveThought">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= 新建/编辑仓库弹窗 ======================= -->
+  <div class="modal-mask" id="repoModal" hidden>
+    <div class="modal">
+      <h2 id="repoModalTitle">新建思想仓库</h2>
+      <div class="form-row">
+        <label>仓库名称 <span class="req">*</span></label>
+        <input id="rName" placeholder="例如：工作、投资、健康、技术知识" />
+      </div>
+      <div class="form-row">
+        <label>描述（可选）</label>
+        <input id="rDesc" placeholder="这个仓库存放哪方面的思想？" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" id="btnCancelRepo">取消</button>
+        <button class="btn primary" id="btnSaveRepo">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================= 仓库管理弹窗 ======================= -->
+  <div class="modal-mask" id="repoManageModal" hidden>
+    <div class="modal">
+      <h2>管理思想仓库</h2>
+      <p class="hint">删除仓库不会丢失思想，其中的思想会自动移入「默认仓库」。</p>
+      <div id="repoManageList"></div>
+      <div class="modal-actions">
+        <button class="btn primary" id="btnNewRepoInManage">＋ 新建仓库</button>
+        <button class="btn ghost" id="btnCloseRepoManage">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastRoot"></div>
+  <input type="file" id="importFile" accept=".json" hidden />
+  <input type="file" id="importDocFile" accept=".txt,.md,.markdown,.log,.csv,.docx,.zip" hidden />
+  <script src="app.js"></script>
+</body>
+</html>

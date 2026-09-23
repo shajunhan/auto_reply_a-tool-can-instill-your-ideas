@@ -1,0 +1,10 @@
+{
+  "port": 8688,
+  "baseUrl": "https://api.deepseek.com/v1",
+  "apiKey": "",
+  "model": "deepseek-chat",
+  "temperature": 0.7,
+  "topK": 8,
+  "userName": "我",
+  "systemPrompt": ""
+}

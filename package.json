@@ -1,0 +1,9 @@
+{
+  "name": "thought-library",
+  "version": "1.0.0",
+  "description": "个人思想库：记录思想、学会逻辑，用 AI 思维分身按你的方式回答",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  }
+}
